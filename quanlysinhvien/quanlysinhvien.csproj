@@ -1,0 +1,218 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1366CF9C-9C5B-4040-9779-F4F2397E304E}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>quanlysinhvien</RootNamespace>
+    <AssemblyName>quanlysinhvien</AssemblyName>
+    <LangVersion>8.0</LangVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <UseIISExpress>true</UseIISExpress>
+    <Use64BitIISExpress />
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LegacyPublishPropertiesPageEnabled>true</LegacyPublishPropertiesPageEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=2.0.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.12\lib\net45\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data.Common, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.Common.4.3.0\lib\net451\System.Data.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SqlClient, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.SqlClient.4.8.6\lib\net451\System.Data.SqlClient.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="GiangVienService.svc" />
+    <Content Include="Global.asax" />
+    <Content Include="LopService.svc" />
+    <Content Include="BangDiemService.svc" />
+    <Content Include="MonHocService.svc" />
+    <Content Include="LogService.svc" />
+    <Content Include="views\app.js" />
+    <Content Include="create table.sql" />
+    <Content Include="index.aspx" />
+    <Content Include="KhoaService.svc" />
+    <Content Include="SinhvienService.svc" />
+    <Content Include="views\bangdiem\controller.js" />
+    <Content Include="views\bangdiem\model.js" />
+    <Content Include="views\bangdiem\store.js" />
+    <Content Include="views\bangdiem\view.js" />
+    <Content Include="views\logmanagement\controller.js" />
+    <Content Include="views\logmanagement\model.js" />
+    <Content Include="views\logmanagement\store.js" />
+    <Content Include="views\logmanagement\view.js" />
+    <Content Include="views\monhoc\controller.js" />
+    <Content Include="views\monhoc\model.js" />
+    <Content Include="views\monhoc\store.js" />
+    <Content Include="views\monhoc\view.js" />
+    <Content Include="views\lop\controller.js" />
+    <Content Include="views\lop\model.js" />
+    <Content Include="views\lop\store.js" />
+    <Content Include="views\lop\view.js" />
+    <Content Include="views\giangvien\controller.js" />
+    <Content Include="views\giangvien\model.js" />
+    <Content Include="views\giangvien\store.js" />
+    <Content Include="views\giangvien\view.js" />
+    <Content Include="views\sinhvien\controller.js" />
+    <Content Include="views\sinhvien\model.js" />
+    <Content Include="views\sinhvien\store.js" />
+    <Content Include="views\sinhvien\view.js" />
+    <Content Include="views\khoa\controller.js" />
+    <Content Include="views\khoa\view.js" />
+    <Content Include="views\khoa\store.js" />
+    <Content Include="views\khoa\model.js" />
+    <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Business\BangdiemBLL.cs" />
+    <Compile Include="Business\GiangVienBLL.cs" />
+    <Compile Include="Business\MonHocBLL.cs" />
+    <Compile Include="Business\LopBLL.cs" />
+    <Compile Include="Data\BangdiemRepository.cs" />
+    <Compile Include="Data\MonHocRepository.cs" />
+    <Compile Include="Data\LopRepository.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="IServices\ILopService.cs" />
+    <Content Include="StatisticsService.svc" />
+    <Compile Include="Services\StatisticsService.cs" />
+    <Compile Include="Services\BangdiemService.cs" />
+    <Compile Include="Services\LogService.cs" />
+    <Compile Include="Services\LopService.cs" />
+    <Compile Include="Services\KhoaService.cs" />
+    <Compile Include="Services\GiangVienService.cs" />
+    <Compile Include="Services\MonHocService.cs" />
+    <Compile Include="Services\SinhvienService.cs" />
+    <Compile Include="IServices\IKhoaService.cs" />
+    <Compile Include="IServices\ISinhvienService.cs" />
+    <Compile Include="IServices\IGiangvienService.cs" />
+    <Compile Include="IServices\IMonhocService.cs" />
+    <Compile Include="IServices\IInforSinhvienService.cs" />
+    <Compile Include="IServices\IInforGiangvienService.cs" />
+    <Compile Include="IServices\IBangdiemService.cs" />
+    <Compile Include="Business\KhoaBLL.cs" />
+    <Compile Include="Business\SinhvienBLL.cs" />
+    <Compile Include="Data\DBconnection.cs" />
+    <Compile Include="Data\GiangVienRepository.cs" />
+    <Compile Include="Data\KhoaRepository.cs" />
+    <Compile Include="Data\SinhVienRepository.cs" />
+    <Compile Include="Helper\ConnectionStringHelper.cs" />
+    <Compile Include="Helper\LogHelper.cs" />
+    <Compile Include="Helper\StringHelper.cs" />
+    <Compile Include="Models\BANGDIEM.cs" />
+    <Compile Include="Models\BANGDIEMDTO.cs" />
+    <Compile Include="Models\GIANGVIEN.cs" />
+    <Compile Include="Models\GIANGVIENDTO.cs" />
+    <Compile Include="Models\INFORGIANGVIEN.cs" />
+    <Compile Include="Models\INFORGIANGVIENDTO.cs" />
+    <Compile Include="Models\INFORSINHVIEN.cs" />
+    <Compile Include="Models\INFORSINHVIENDTO.cs" />
+    <Compile Include="Models\KHOA.cs" />
+    <Compile Include="Models\KHOADTO.cs" />
+    <Compile Include="Models\LOP.cs" />
+    <Compile Include="Models\LOPDTO.cs" />
+    <Compile Include="Models\MONHOC.cs" />
+    <Compile Include="Models\MONHOCDTO.cs" />
+    <Compile Include="Models\SINHVIEN.cs" />
+    <Compile Include="Models\SINHVIENDTO.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Browsers\" />
+    <Folder Include="App_Data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">17.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>60635</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:60635/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
