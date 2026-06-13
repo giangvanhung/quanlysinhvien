@@ -1,0 +1,37 @@
+site_name: Quản lý sinh viên - Docs
+site_description: Tài liệu hệ thống quản lý sinh viên (WCF + ExtJS + SQL Server)
+site_author: Giang Văn Hưng
+
+theme:
+  name: material
+  language: vi
+  palette:
+    - scheme: default          # giao diện sáng
+      primary: indigo          # màu chính
+      accent: deep purple      # màu nhấn
+    - scheme: slate            # giao diện tối
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Chuyển sang chế độ tối
+  custom_dir: overrides
+  
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Bài toán: baitoan.md
+  - Giải pháp công nghệ: Giaiphapcongnghe.md
+  - Giao diện: giaodien.md
+  - Kiến thức: kienthuc.md
+
+repo_url: https://github.com/giangvanhung/quanlysinhvien
+repo_name: quanlysinhvien
+
+extra:
+  social:
+    - icon: material/account
+      link: https://github.com/giangvanhung/quanlysinhvien
+      name: Tác giả - Giang Văn Hưng
