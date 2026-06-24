@@ -1,43 +1,196 @@
-# Giao diện
+# Giao Diện
 
-Trang này minh hoạ các màn hình chính của hệ thống Quản lý sinh viên được xây dựng bằng ExtJS, bao gồm màn hình đăng nhập, danh sách sinh viên, thêm/sửa sinh viên và tìm kiếm.
-
----
-
-## 1. Màn hình chính / Dashboard
-
-![Giao diện màn hình chính](image-2.png)
-
-Màn hình chính hiển thị thanh menu hoặc các nút chức năng cho phép người dùng truy cập nhanh tới các module quản lý: khoa, lớp, sinh viên, giảng viên, môn học và điểm.  
-Tại đây người dùng có thể xem tổng quan số lượng sinh viên, lớp hoặc các thông tin thống kê cơ bản (nếu có).
+Tổng quan màn hình và layout của từng module trong hệ thống.
 
 ---
 
-## 2. Màn hình quản lý sinh viên
+## Layout tổng thể
 
-![Giao diện quản lý sinh viên](image-3.png)
-
-Màn hình quản lý sinh viên được xây dựng dưới dạng lưới (Ext.grid.Panel) kết hợp với form chi tiết:
-
-- Phần lưới hiển thị danh sách sinh viên với các cột cơ bản như: Mã SV, Tên SV, Ngày sinh, Giới tính, Lớp, Khoa,…  
-- Phần form cho phép thêm mới hoặc chỉnh sửa thông tin sinh viên (họ tên, ngày sinh, giới tính, địa chỉ, số điện thoại, email, dân tộc, tôn giáo,…).  
-- Thanh công cụ (toolbar) hỗ trợ các thao tác: thêm, sửa, xoá, lưu, làm mới dữ liệu.
+```
+┌──────────────────────────────────────────────────────────────┐
+│  Header — Logo + Tên hệ thống                                │
+├─────────────────┬────────────────────────────────────────────┤
+│  Menu bên trái  │  Vùng nội dung chính (Ext.panel.Panel)     │
+│                 │                                            │
+│  - Khoa         │  ┌──────────────────────────────────────┐  │
+│  - Lớp          │  │  Toolbar: [Thêm] [Sửa] [Xóa] [Làm]  │  │
+│  - Sinh viên    │  ├──────────────────────────────────────┤  │
+│  - Giảng viên   │  │  Grid — danh sách dữ liệu            │  │
+│  - Môn học      │  │  (phân trang, sắp xếp, tìm kiếm)    │  │
+│  - Bảng điểm    │  └──────────────────────────────────────┘  │
+│                 │                                            │
+└─────────────────┴────────────────────────────────────────────┘
+```
 
 ---
 
-## 3. Chức năng tìm kiếm và lọc
+## Module Khoa & Lớp
 
-Trên màn hình danh sách sinh viên có ô tìm kiếm và/hoặc các combobox lọc theo Khoa, Lớp, Năm học,…  
-Người dùng nhập từ khoá (tên, mã sinh viên, email,…) hoặc chọn tiêu chí lọc, ExtJS sẽ gửi yêu cầu tới WCF service để lấy danh sách kết quả phù hợp và cập nhật lại lưới.
+```
+┌─────────────────────────────────────────────────────┐
+│  Quản lý Khoa                                       │
+│  [+ Thêm]  [✏ Sửa]  [🗑 Xóa]  [↻ Làm mới]         │
+├──────────────┬──────────────────────────────────────┤
+│  Mã Khoa     │  Tên Khoa                            │
+├──────────────┼──────────────────────────────────────┤
+│  CNTT        │  Công nghệ thông tin                 │
+│  KTKT        │  Kế toán kiểm toán                   │
+│  ...         │  ...                                 │
+└──────────────┴──────────────────────────────────────┘
+
+  Khi nhấn Thêm / Sửa → Form popup hiện:
+  ┌────────────────────────────────────────┐
+  │  Thêm khoa mới                    [✕]  │
+  │  Mã Khoa:  [____________]              │
+  │  Tên Khoa: [____________]              │
+  │             [Lưu]  [Hủy]              │
+  └────────────────────────────────────────┘
+```
+
+Module **Lớp** có thêm combobox chọn Khoa (load từ `KhoaService.svc/GetAll`).
 
 ---
 
-## 4. Các màn hình khác
+## Module Sinh Viên
 
-Ngoài màn hình sinh viên, hệ thống còn có các giao diện tương tự cho:
+```
+┌────────────────────────────────────────────────────────────────┐
+│  Quản lý Sinh Viên                                             │
+│  [+ Thêm]  [✏ Sửa]  [🗑 Xóa]  [📋 Bảng điểm]  [ℹ Thông tin] │
+├────────┬──────────────────┬────────────┬──────────┬────────────┤
+│  Mã SV │  Họ và Tên       │  Ngày sinh │  Giới t. │  Lớp       │
+├────────┼──────────────────┼────────────┼──────────┼────────────┤
+│  SV001 │  Nguyễn Văn An   │  15/05/03  │  Nam     │  CT22A     │
+│  SV002 │  Trần Thị Bình   │  22/08/03  │  Nữ      │  CT22A     │
+└────────┴──────────────────┴────────────┴──────────┴────────────┘
 
-- Quản lý khoa và lớp.  
-- Quản lý môn học và điểm.  
-- Quản lý thông tin giảng viên.
+  Form thêm/sửa SV:
+  ┌──────────────────────────────────────────────┐
+  │  Thông tin sinh viên                    [✕]  │
+  │  Mã SV:     [__________]                     │
+  │  Họ tên:    [__________]                     │
+  │  Ngày sinh: [__________]  (DateField)        │
+  │  Giới tính: ● Nam  ○ Nữ   (RadioGroup)       │
+  │  Lớp:       [▼ CT22A   ]  (ComboBox)         │
+  │              [Lưu]  [Hủy]                    │
+  └──────────────────────────────────────────────┘
+```
 
-Các màn hình này đều tuân theo cùng một mẫu: lưới dữ liệu kết hợp form chi tiết, giúp giao diện thống nhất, dễ sử dụng và dễ mở rộng thêm chức năng trong tương lai.
+### Xem bảng điểm sinh viên
+
+Chọn SV → click **Bảng điểm** → popup grid:
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│  Bảng điểm — Nguyễn Văn An (SV001)                      [✕]  │
+├──────────────────┬──────────────────┬─────────┬──────────────┤
+│  Môn học         │  Giảng viên      │  Điểm   │  Năm học     │
+├──────────────────┼──────────────────┼─────────┼──────────────┤
+│  Lập trình CB    │  Nguyễn Thị Lan  │  8.5    │  2024-2025   │
+│  Cơ sở dữ liệu  │  Trần Văn Minh   │  7.0    │  2024-2025   │
+└──────────────────┴──────────────────┴─────────┴──────────────┘
+```
+
+---
+
+## Module Giảng Viên
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Quản lý Giảng Viên                                    │
+│  [+ Thêm]  [✏ Sửa]  [🗑 Xóa]  [ℹ Thông tin mở rộng]  │
+├────────┬─────────────────┬────────────┬──────────┬─────┤
+│  Mã GV │  Họ và Tên      │  Ngày sinh │  Giới t. │Khoa │
+├────────┼─────────────────┼────────────┼──────────┼─────┤
+│  GV001 │  Nguyễn Thị Lan │  12/03/80  │  Nữ      │CNTT │
+│  GV002 │  Trần Văn Minh  │  05/07/75  │  Nam     │CNTT │
+└────────┴─────────────────┴────────────┴──────────┴─────┘
+```
+
+Form tương tự sinh viên, combobox chọn Khoa thay vì Lớp.
+
+---
+
+## Module Môn Học
+
+```
+┌───────────────────────────────────┐
+│  Quản lý Môn Học                  │
+│  [+ Thêm]  [✏ Sửa]  [🗑 Xóa]    │
+├──────────────┬────────────────────┤
+│  Mã Môn      │  Tên Môn           │
+├──────────────┼────────────────────┤
+│  LTCB        │  Lập trình cơ bản  │
+│  CSDL        │  Cơ sở dữ liệu     │
+└──────────────┴────────────────────┘
+```
+
+---
+
+## Module Bảng Điểm
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  Quản lý Bảng Điểm                                               │
+│  [+ Nhập điểm]  [✏ Sửa]  [🗑 Xóa]  [↻ Làm mới]                 │
+├────────┬──────────┬──────────────────┬─────────┬────────────────┤
+│  Mã SV │  Mã Môn  │  Giảng viên      │  Điểm   │  Năm học       │
+├────────┼──────────┼──────────────────┼─────────┼────────────────┤
+│  SV001 │  LTCB    │  Nguyễn Thị Lan  │  8.5    │  2024-2025     │
+│  SV002 │  CSDL    │  Trần Văn Minh   │  7.0    │  2024-2025     │
+└────────┴──────────┴──────────────────┴─────────┴────────────────┘
+
+  Form nhập điểm:
+  ┌──────────────────────────────────────────┐
+  │  Nhập điểm                          [✕]  │
+  │  Sinh viên:   [▼ SV001 — Nguyễn Văn An] │
+  │  Môn học:     [▼ LTCB — Lập trình CB  ] │
+  │  Giảng viên:  [▼ GV001 — Nguyễn Thị L ] │
+  │  Điểm số:     [8.5]                      │
+  │  Năm học:     [2024-2025]                │
+  │               [Lưu]  [Hủy]              │
+  └──────────────────────────────────────────┘
+```
+
+---
+
+## Thông tin mở rộng (SV / GV)
+
+Cả sinh viên và giảng viên đều có tab thông tin mở rộng:
+
+```
+┌────────────────────────────────────────────────────┐
+│  Thông tin chi tiết — Nguyễn Văn An           [✕]  │
+│  ─────────────────────────────────────────────────  │
+│  Địa chỉ:   [12 Trần Hưng Đạo, Hà Nội       ]    │
+│  SDT:       [0987654321                      ]    │
+│  Email:     [nguyenvanan@email.com           ]    │
+│  Dân tộc:   [Kinh                            ]    │
+│  Tôn giáo:  [Không                          ]    │
+│                          [Lưu]  [Hủy]            │
+└────────────────────────────────────────────────────┘
+```
+
+---
+
+## Pattern giao diện chung
+
+Tất cả module tuân theo **cùng một pattern**:
+
+```mermaid
+flowchart LR
+    GRID["Grid Panel\nDanh sách dữ liệu"]
+    FORM["Form / Window\nThêm / Sửa"]
+    CTRL["Controller\nEvent handler"]
+
+    GRID -->|"click Thêm"| FORM
+    GRID -->|"chọn row + Sửa"| FORM
+    FORM -->|"submit"| CTRL
+    CTRL -->|"AJAX"| API["WCF Service"]
+    API -->|"success"| CTRL
+    CTRL -->|"store.reload()"| GRID
+```
+
+!!! tip "Tái sử dụng pattern"
+    Mỗi module có cùng cấu trúc: `model.js` → `view.js` (Grid + Form) → `controller.js`.  
+    Khi thêm module mới, chỉ cần copy và thay đổi field names + URL.

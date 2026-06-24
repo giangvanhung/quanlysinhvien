@@ -1,48 +1,357 @@
-# Kiến Thức
+# Kiến Thức Kỹ Thuật
 
-Trang này tổng hợp các kiến thức nền tảng và ghi chú kỹ thuật đã sử dụng trong quá trình xây dựng hệ thống Quản lý sinh viên, bao gồm cơ sở dữ liệu, backend (C#, WCF), frontend (ExtJS) và quy trình phát triển.
-
----
-
-## 1. Kiến thức về cơ sở dữ liệu
-
-- Thiết kế CSDL với MS SQL Server: tạo bảng, khóa chính, khóa ngoại, định nghĩa quan hệ giữa Khoa – Lớp – Sinh viên – Môn học – Điểm.  
-- Viết câu lệnh SQL cơ bản: `SELECT`, `INSERT`, `UPDATE`, `DELETE` để thao tác dữ liệu.  
-- Normalization cơ bản: tách các bảng SINHVIEN, LOP, KHOA, MONHOC, DIEM, INFORSINHVIEN, INFORGIANGVIEN nhằm giảm trùng lặp dữ liệu và đảm bảo toàn vẹn tham chiếu.
+Tổng hợp kiến thức, patterns và gotchas trong quá trình xây dựng hệ thống.
 
 ---
 
-## 2. Kiến thức về backend (C#, WCF)
+## 1. WCF REST — Những điểm quan trọng
 
-- Xây dựng DTO (Data Transfer Object) để truyền dữ liệu giữa các lớp và giữa WCF service với client, tránh phụ thuộc trực tiếp vào entity của CSDL.  
-- Áp dụng Repository Pattern: tách code truy cập dữ liệu (SQL/ADO.NET) khỏi service, giúp dễ test, dễ bảo trì và thay đổi cách lưu trữ khi cần.  
-- Tạo WCF Service: định nghĩa service contract (interface, ví dụ `IDataService`), cài đặt trong lớp `DataService` và cấu hình endpoint, binding, behavior trong `web.config`.  
-- Deploy WCF Service lên IIS: tạo Application Pool, cấu hình Virtual Directory / Application, trỏ tới thư mục chứa service và cấu hình binding phù hợp (HTTP).  
-- Xử lý connection string và lỗi kết nối SQL: cấu hình connection string trong `web.config`, bắt và log các lỗi khi kết nối CSDL để dễ debug.
+### webHttpBinding vs basicHttpBinding
 
----
+!!! danger "Không dùng basicHttpBinding cho REST/JSON"
+    `basicHttpBinding` = SOAP. Dùng `webHttpBinding` + `webHttp` behavior mới ra JSON.
 
-## 3. Kiến thức về frontend (ExtJS)
-
-- Tạo ExtJS Store kết nối tới WCF Service với proxy (ví dụ `proxy: { type: 'rest', url: '...' }`), cấu hình reader/writer để ánh xạ JSON ↔ model.  
-- Xây dựng Grid Panel: định nghĩa các cột, hỗ trợ phân trang (paging), tìm kiếm, sắp xếp và hiển thị danh sách sinh viên, lớp, khoa, v.v.  
-- Tạo Form Panel: cấu hình field, validation, xử lý submit và reset form, kết hợp với store/controller để thêm/sửa dữ liệu.  
-- Module hóa ứng dụng ExtJS: tổ chức theo mô hình MVC (app/khoa/model.js, view.js, controller.js, …), đăng ký các module và tích hợp vào menu chung của hệ thống.
+```xml
+<!-- ĐÚNG cho REST -->
+<binding name="webHttpBinding" />
+<behavior name="webBehavior">
+    <webHttp defaultOutgoingResponseFormat="Json" helpEnabled="true"/>
+</behavior>
+```
 
 ---
 
-## 4. Kiến thức về quy trình phát triển
+### [WebGet] vs [WebInvoke]
 
-- Full-stack workflow: thiết kế CSDL → tạo DTO → xây dựng Repository/DAL → triển khai WCF Service → kết nối từ ExtJS thông qua store/proxy.  
-- Kỹ thuật debug: dùng WCF Test Client/Fiddler/Postman để kiểm tra service, DevTools/Console cho ExtJS, SQL Server Profiler để theo dõi truy vấn.  
-- Version control: sử dụng Git để quản lý mã nguồn, commit theo từng chức năng, giúp theo dõi lịch sử thay đổi và làm việc nhóm.  
-- Viết báo cáo kỹ thuật: trình bày bài toán, phân tích yêu cầu, mô tả giải pháp, trích dẫn code mẫu quan trọng và minh họa kết quả chạy chương trình.
+```csharp
+// Read-only → [WebGet]
+[WebGet(UriTemplate = "GetAll", ResponseFormat = WebMessageFormat.Json)]
+List<SINHVIENDTO> GetAll();
+
+[WebGet(UriTemplate = "GetById/{id}", ResponseFormat = WebMessageFormat.Json)]
+SINHVIENDTO GetById(string id);  // id trong UriTemplate phải là string
+
+// Write operations → [WebInvoke]
+[WebInvoke(Method = "POST", UriTemplate = "Create",
+    RequestFormat  = WebMessageFormat.Json,
+    ResponseFormat = WebMessageFormat.Json)]
+void Create(SINHVIENDTO dto);
+
+[WebInvoke(Method = "PUT", UriTemplate = "Update/{id}", ...)]
+void Update(string id, SINHVIENDTO dto);
+
+[WebInvoke(Method = "DELETE", UriTemplate = "Delete/{id}", ...)]
+void Delete(string id);
+```
+
+!!! warning "UriTemplate param phải là string"
+    Các param trong UriTemplate (`{id}`, `{maSV}`) phải là `string` trong C#.  
+    WCF không tự convert từ path string sang `int`.
 
 ---
 
-## 5. Kiến thức bổ sung
+### DateTime serialization
 
-- Logging: tìm hiểu và áp dụng log4net (hoặc thư viện tương tự), cấu hình appender, logger để ghi log ở các lớp Service/Repository.  
-- Bảo mật: nghiên cứu các khái niệm Authentication, Authorization cho WCF và ứng dụng web (chưa triển khai trong phạm vi dự án).  
-- ORM: tìm hiểu các công cụ ORM như Entity Framework, Dapper để thay thế ADO.NET thuần trong tương lai (chưa áp dụng trong dự án hiện tại).  
-- Best practices: áp dụng các nguyên tắc như separation of concerns, dependency injection, SOLID để mã nguồn dễ đọc, dễ test và dễ mở rộng.
+WCF `DataContractJsonSerializer` serialize `DateTime` thành format `/Date(ms)/`:
+
+```json
+"NgaySinh": "\/Date(1052956800000)\/"
+```
+
+**ExtJS parse:**
+```javascript
+// Trong model definition
+fields: [
+    { name: 'NgaySinh', type: 'date', dateFormat: 'MS' }
+    // 'MS' = Microsoft JSON Date format
+]
+```
+
+---
+
+### CORS — Cross-Origin Request
+
+Nếu ExtJS và WCF chạy trên khác port, cần enable CORS trong `web.config`:
+
+```xml
+<system.webServer>
+  <httpProtocol>
+    <customHeaders>
+      <add name="Access-Control-Allow-Origin"  value="*"/>
+      <add name="Access-Control-Allow-Methods" value="GET, POST, PUT, DELETE, OPTIONS"/>
+      <add name="Access-Control-Allow-Headers" value="Content-Type"/>
+    </customHeaders>
+  </httpProtocol>
+</system.webServer>
+```
+
+---
+
+## 2. ADO.NET — Repository Pattern
+
+### Cấu trúc SqlConnection đúng
+
+```csharp
+// Luôn dùng using để đảm bảo connection đóng
+public SINHVIENDTO GetById(string maSV)
+{
+    using (var conn = new SqlConnection(_connStr))
+    {
+        conn.Open();
+        var cmd = new SqlCommand(
+            "SELECT * FROM SINHVIEN WHERE MaSV = @MaSV", conn);
+        cmd.Parameters.AddWithValue("@MaSV", maSV);
+
+        using (var reader = cmd.ExecuteReader())
+        {
+            if (reader.Read())
+            {
+                return new SINHVIENDTO {
+                    MaSV     = reader["MaSV"].ToString(),
+                    TenSV    = reader["TenSV"].ToString(),
+                    NgaySinh = Convert.ToDateTime(reader["NgaySinh"]),
+                    GioiTinh = Convert.ToBoolean(reader["GioiTinh"]),
+                    MaLop    = reader["MaLop"].ToString()
+                };
+            }
+        }
+    }
+    return null;
+}
+```
+
+!!! danger "SQL Injection"
+    Luôn dùng `@Parameter` + `AddWithValue`. Không nối chuỗi trực tiếp vào SQL.
+
+---
+
+### Kiểm tra row affected
+
+```csharp
+public bool Delete(string maSV)
+{
+    using (var conn = new SqlConnection(_connStr))
+    {
+        conn.Open();
+        var cmd = new SqlCommand(
+            "DELETE FROM SINHVIEN WHERE MaSV = @MaSV", conn);
+        cmd.Parameters.AddWithValue("@MaSV", maSV);
+
+        int rows = cmd.ExecuteNonQuery();
+        return rows > 0;  // false nếu không tìm thấy record
+    }
+}
+```
+
+---
+
+### FK Constraint — Xóa dây chuyền
+
+Không thể xóa **SINHVIEN** khi còn record trong **DIEM** hoặc **INFORSINHVIEN**.  
+Phải xóa các bảng con trước, hoặc dùng `ON DELETE CASCADE`.
+
+```sql
+-- Option 1: Xóa thủ công từ BLL
+DELETE FROM INFORSINHVIEN WHERE MaSV = @MaSV;
+DELETE FROM DIEM WHERE MaSV = @MaSV;
+DELETE FROM SINHVIEN WHERE MaSV = @MaSV;
+
+-- Option 2: CASCADE (trong CREATE TABLE)
+FOREIGN KEY (MaSV) REFERENCES SINHVIEN(MaSV) ON DELETE CASCADE
+```
+
+---
+
+## 3. ExtJS Classic — Những điểm quan trọng
+
+### Store + REST Proxy
+
+```javascript
+Ext.define('App.model.SinhVien', {
+    extend: 'Ext.data.Model',
+    fields: [
+        { name: 'MaSV',     type: 'string' },
+        { name: 'TenSV',    type: 'string' },
+        { name: 'NgaySinh', type: 'date', dateFormat: 'MS' },
+        { name: 'GioiTinh', type: 'boolean' },
+        { name: 'MaLop',    type: 'string' }
+    ]
+});
+
+Ext.define('App.store.SinhVien', {
+    extend: 'Ext.data.Store',
+    model: 'App.model.SinhVien',
+    proxy: {
+        type:   'rest',
+        url:    'http://localhost:PORT/SinhvienService.svc/',
+        reader: { type: 'json', rootProperty: '' },
+        writer: { type: 'json' }
+    },
+    autoLoad: true
+});
+```
+
+!!! warning "rootProperty"
+    WCF trả về JSON array trực tiếp (không có wrapper object), nên `rootProperty: ''`.  
+    Nếu dùng `rootProperty: 'data'`, ExtJS sẽ không đọc được gì.
+
+---
+
+### Grid Panel cơ bản
+
+```javascript
+Ext.define('App.view.SinhVienGrid', {
+    extend: 'Ext.grid.Panel',
+    store: 'App.store.SinhVien',
+    columns: [
+        { text: 'Mã SV',    dataIndex: 'MaSV',     flex: 1 },
+        { text: 'Họ tên',   dataIndex: 'TenSV',     flex: 2 },
+        { text: 'Ngày sinh',dataIndex: 'NgaySinh',  flex: 1,
+          renderer: Ext.util.Format.dateRenderer('d/m/Y') },
+        { text: 'Giới tính',dataIndex: 'GioiTinh',  flex: 1,
+          renderer: function(v) { return v ? 'Nam' : 'Nữ'; } },
+        { text: 'Lớp',      dataIndex: 'MaLop',     flex: 1 }
+    ],
+    tbar: [
+        { text: 'Thêm', iconCls: 'x-fa fa-plus',   handler: 'onAdd' },
+        { text: 'Sửa',  iconCls: 'x-fa fa-edit',   handler: 'onEdit' },
+        { text: 'Xóa',  iconCls: 'x-fa fa-trash',  handler: 'onDelete' }
+    ]
+});
+```
+
+---
+
+### ComboBox load từ WCF
+
+```javascript
+{
+    xtype: 'combobox',
+    fieldLabel: 'Lớp',
+    displayField: 'TenLop',
+    valueField:   'MaLop',
+    store: {
+        fields: ['MaLop', 'TenLop'],
+        proxy: {
+            type:   'ajax',
+            url:    'http://localhost:PORT/LopService.svc/GetAll',
+            reader: { type: 'json', rootProperty: '' }
+        },
+        autoLoad: true
+    }
+}
+```
+
+---
+
+### AJAX request thủ công
+
+```javascript
+// Khi cần control tốt hơn store
+Ext.Ajax.request({
+    url:      'http://localhost:PORT/SinhvienService.svc/Create',
+    method:   'POST',
+    headers:  { 'Content-Type': 'application/json' },
+    jsonData: rec.getData(),
+    success: function(response) {
+        var data = Ext.decode(response.responseText);
+        store.reload();
+        Ext.Msg.alert('Thành công', 'Đã thêm sinh viên');
+    },
+    failure: function(response) {
+        Ext.Msg.alert('Lỗi', 'Không thể kết nối đến server');
+    }
+});
+```
+
+---
+
+## 4. Quy trình phát triển (Full-stack Workflow)
+
+```mermaid
+flowchart LR
+    A["1. Thiết kế DB\nSQL CREATE TABLE"] -->
+    B["2. Tạo Entity\n& DTO (C#)"] -->
+    C["3. Viết Repository\nADO.NET SQL"] -->
+    D["4. Viết BLL\nValidation"] -->
+    E["5. Viết WCF Service\n[ServiceContract]"] -->
+    F["6. Cấu hình web.config\nendpoint + binding"] -->
+    G["7. Test với Postman\nhoặc WCF Test Client"] -->
+    H["8. Viết ExtJS Model\n+ Store"] -->
+    I["9. Viết View\nGrid + Form"] -->
+    J["10. Viết Controller\nEvent handlers"] -->
+    K["11. Test toàn luồng\nBrowser DevTools"]
+```
+
+---
+
+## 5. Debug Checklist
+
+| Triệu chứng | Kiểm tra |
+|---|---|
+| WCF 400 Bad Request | Content-Type có phải `application/json` không? Body có đúng format? |
+| WCF 405 Method Not Allowed | `[WebGet]` thay vì `[WebInvoke]` hoặc ngược lại? |
+| JSON rỗng / null | `rootProperty` trong reader có đúng không? |
+| DateTime sai | Dùng `dateFormat: 'MS'` trong model? |
+| ComboBox không load | Store của combobox có `autoLoad: true`? URL có đúng không? |
+| FK constraint error | Xóa bảng con trước khi xóa bảng cha |
+| IIS Express không start | Port đang bị giữ — kill process IIS Express cũ |
+| Grid không refresh sau save | `store.reload()` có được gọi trong success callback không? |
+
+---
+
+## 6. Bảo mật — Lưu ý
+
+!!! warning "Dự án chưa triển khai xác thực"
+    Hiện tại WCF service không có authentication. Mọi request đều được chấp nhận.
+
+Hướng triển khai trong tương lai:
+
+```csharp
+// Option 1: Custom header token
+// Client gửi: X-Auth-Token: <token>
+// WCF kiểm tra trong IDispatchMessageInspector
+
+// Option 2: ASP.NET Forms Authentication (nếu host trên IIS)
+
+// Option 3: JWT (cần thêm thư viện hoặc chuyển sang ASP.NET Web API)
+```
+
+---
+
+## 7. Logging
+
+```csharp
+// LogService.cs — ghi log vào file / event log
+public class LogService
+{
+    private static readonly log4net.ILog Log =
+        log4net.LogManager.GetLogger(typeof(LogService));
+
+    public static void Info(string msg)  => Log.Info(msg);
+    public static void Error(string msg, Exception ex) => Log.Error(msg, ex);
+}
+
+// Dùng trong Repository
+try
+{
+    // ... DB operations
+}
+catch (SqlException ex)
+{
+    LogService.Error("SQL error in SinhvienRepository.Create", ex);
+    throw;  // re-throw để WCF trả lỗi cho client
+}
+```
+
+---
+
+## 8. Best Practices áp dụng
+
+| Principle | Cách áp dụng |
+|---|---|
+| **Separation of Concerns** | Interface / Service / BLL / Repository tách biệt |
+| **Repository Pattern** | SQL chỉ nằm trong DAL, không rải rác trong Service |
+| **DTO Pattern** | Tách model DB và model truyền dữ liệu |
+| **Single Responsibility** | Mỗi Service / BLL / Repository chỉ xử lý 1 entity |
+| **DRY** | ExtJS module template dùng chung pattern Grid + Form |

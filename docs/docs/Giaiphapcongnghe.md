@@ -1,136 +1,318 @@
-# Giải pháp công nghệ
+# Giải pháp & Kiến trúc
 
-Trang này mô tả kiến trúc tổng thể của hệ thống Quản lý sinh viên, các công nghệ được sử dụng, cấu trúc cơ sở dữ liệu và cách các module chính tương tác với nhau.
+## 1. Tổng quan công nghệ
 
----
-
-## 1. Nền tảng và công nghệ sử dụng
-
-- Ngôn ngữ lập trình: C#  
-- Nền tảng backend: .NET Framework 4.5.1  
-- Kiểu backend: WCF Service Application, exposes các service để CRUD dữ liệu sinh viên, khoa, lớp, môn học, giảng viên, điểm.  
-- Cơ sở dữ liệu: SQL Server, sử dụng các bảng KHOA, LOP, SINHVIEN, MONHOC, GIANGVIEN, INFORSINHVIEN, INFORGIANGVIEN, DIEM.  
-- Frontend: ExtJS, tổ chức theo mô hình MVC (app/`<module>`/model.js, view.js, controller.js).  
-- Công cụ phát triển: Visual Studio cho backend, trình duyệt + IDE (VS Code/WebStorm…) cho frontend.
+| Tầng | Công nghệ | Vai trò |
+|---|---|---|
+| **Presentation** | ExtJS Classic MVC | Grid, Form, Window — giao tiếp qua AJAX |
+| **Service** | WCF REST, .NET 4.5.1 | Expose endpoint HTTP, serialize JSON |
+| **Business** | C# BLL classes | Validate, enforce business rules |
+| **Data Access** | Repository + ADO.NET | SQL queries tới SQL Server |
+| **Database** | SQL Server | Lưu trữ quan hệ, khóa ngoại |
 
 ---
 
-## 2. Cơ sở dữ liệu
+## 2. Kiến trúc 4 tầng Backend
 
-Hệ thống sử dụng cơ sở dữ liệu quan hệ để lưu trữ toàn bộ thông tin về khoa, lớp, sinh viên, giảng viên, môn học và điểm số. Mối quan hệ giữa các bảng được thiết kế để đảm bảo tính toàn vẹn dữ liệu (khóa chính/khóa ngoại) và hỗ trợ truy vấn linh hoạt.
+```mermaid
+flowchart TD
+    subgraph "Tầng 1 — Contract (Interface)"
+        I1["IKhoaService"]
+        I2["ILopService"]
+        I3["ISinhvienService"]
+        I4["IGiangvienService"]
+        I5["IMonhocService"]
+        I6["IBangdiemService"]
+        I7["IInforSinhvienService"]
+        I8["IInforGiangvienService"]
+    end
 
-```sql
-create table KHOA
-(
-    MaKhoa char(15) primary key,
-    TenKhoa nvarchar(100) not null
-)
-create table LOP(
-    MaLop char(15) primary key,
-    TenLop varchar(100) not null,
-    MaKhoa char(15) not null,
-    foreign key (MaKhoa) references KHOA(MaKhoa)
-)
-create table MONHOC(
-    MaMon char(15) primary key,
-    TenMon nvarchar(100) not null
-)
-create table SINHVIEN(
-    MaSV char(15) primary key,
-    TenSV nvarchar(100) not null,
-    NgaySinh date not null,
-    GioiTinh bit not null,
-    MaLop char(15) not null,
-    foreign key (MaLop) references LOP(MaLop)
-)
-create table INFORSINHVIEN(
-    Id int identity(1,1) primary key,
-    DiaChi nvarchar(200) not null,
-    SDT char(15) not null,
-    Email varchar(100) not null,
-    DanToc nvarchar(50) not null,
-    TonGiao nvarchar(50) null,
-    MaSV char(15) not null,
-    foreign key (MaSV) references SINHVIEN(MaSV)
-)
-create table GIANGVIEN(
-    MaGV char(15) primary key,
-    TenGV nvarchar(100) not null,
-    NgaySinh date not null,
-    GioiTinh bit not null,
-    MaKhoa char(15) not null,
-    foreign key (MaKhoa) references KHOA(MaKhoa)
-)
-create table INFORGIANGVIEN(
-    Id int identity(1,1) primary key,
-    DiaChi nvarchar(200) not null,
-    SDT char(15) not null,
-    Email varchar(100) not null,
-    DanToc nvarchar(50) not null,
-    TonGiao nvarchar(50) null,
-    MaGV char(15) not null,
-    foreign key (MaGV) references GIANGVIEN(MaGV)
-)
-create table DIEM(
-    Id int identity(1,1) primary key,
-    MaSV char(15) not null,
-    MaMon char(15) not null,
-    MaGV char(15) not null,
-    DiemSo float not null,
-    NamHoc char(9) not null,
-    foreign key (MaSV) references SINHVIEN(MaSV),
-    foreign key (MaMon) references MONHOC(MaMon),
-    foreign key (MaGV) references GIANGVIEN(MaGV)
-)
+    subgraph "Tầng 2 — Service (Implementation)"
+        S1["KhoaService"]
+        S2["LopService"]
+        S3["SinhvienService"]
+        S4["GiangVienService"]
+        S5["MonHocService"]
+        S6["BangdiemService"]
+    end
+
+    subgraph "Tầng 3 — Business Logic"
+        B1["KhoaBLL"]
+        B2["LopBLL"]
+        B3["SinhvienBLL"]
+        B4["GiangVienBLL"]
+        B5["MonHocBLL"]
+        B6["BangdiemBLL"]
+    end
+
+    subgraph "Tầng 4 — Data Access (Repository)"
+        R["Repository / DAL\nADO.NET SqlConnection"]
+    end
+
+    I1 --> S1 --> B1 --> R
+    I2 --> S2 --> B2 --> R
+    I3 --> S3 --> B3 --> R
+    I4 --> S4 --> B4 --> R
+    I5 --> S5 --> B5 --> R
+    I6 --> S6 --> B6 --> R
 ```
 
 ---
 
-## 3. Mô hình kiến trúc backend
+## 3. Cấu trúc thư mục Backend
 
-Backend được xây dựng dưới dạng WCF Service Application trên .NET Framework 4.5.1. Hệ thống chia thành các lớp chính: Contract, Service (Business), Data Access và Data Transfer Objects (DTO).
-
-![Mô hình kiến trúc backend](image.png)
-
-- Layer Contract: Định nghĩa các service contract (interface WCF) và data contract (DTO) cho các chức năng quản lý khoa, lớp, sinh viên, môn học, giảng viên, điểm.  
-- Layer Service/Business: Cài đặt các service WCF, xử lý nghiệp vụ (kiểm tra ràng buộc, validate dữ liệu, gọi repository tương ứng).  
-- Layer Data Access (Repository/DAL): Chịu trách nhiệm truy cập SQL Server, thực hiện các thao tác CRUD với các bảng KHOA, LOP, SINHVIEN, MONHOC, GIANGVIEN,…  
-- Cấu hình WCF: sử dụng endpoint HTTP (hoặc TCP nếu có), cấu hình binding phù hợp để frontend ExtJS có thể gọi được qua AJAX/JSON.
-
-WCF đóng vai trò trung gian, che giấu chi tiết lưu trữ dữ liệu và cung cấp các API thống nhất cho nhiều module giao diện.
+```
+quanlysinhvien/
+├── IServices/              # Tầng Contract (WCF interface)
+│   ├── IKhoaService.cs
+│   ├── ILopService.cs
+│   ├── ISinhvienService.cs
+│   ├── IGiangvienService.cs
+│   ├── IMonhocService.cs
+│   ├── IBangdiemService.cs
+│   ├── IInforSinhvienService.cs
+│   └── IInforGiangvienService.cs
+│
+├── Services/               # Tầng Service (triển khai IService)
+│   ├── KhoaService.cs
+│   ├── LopService.cs
+│   ├── SinhvienService.cs
+│   ├── GiangVienService.cs
+│   ├── MonHocService.cs
+│   ├── BangdiemService.cs
+│   └── LogService.cs
+│
+├── Business/               # Tầng Business Logic
+│   ├── KhoaBLL.cs
+│   ├── LopBLL.cs
+│   ├── SinhvienBLL.cs
+│   ├── GiangVienBLL.cs
+│   ├── MonHocBLL.cs
+│   └── BangdiemBLL.cs
+│
+├── Models/                 # Entity + DTO
+│   ├── KHOA.cs, KHOADTO.cs
+│   ├── LOP.cs,  LOPDTO.cs
+│   ├── SINHVIEN.cs, SINHVIENDTO.cs
+│   ├── INFORSINHVIEN.cs, INFORSINHVIENDTO.cs
+│   ├── GIANGVIEN.cs, GIANGVIENDTO.cs
+│   ├── INFORGIANGVIEN.cs, INFORGIANGVIENDTO.cs
+│   ├── MONHOC.cs, MONHOCDTO.cs
+│   └── BANGDIEM.cs, BANGDIEMDTO.cs
+│
+└── web.config              # WCF endpoint config, connection string
+```
 
 ---
 
-## 4. Mô hình kiến trúc frontend
+## 4. Cấu hình WCF (web.config)
 
-Frontend được phát triển bằng ExtJS theo mô hình MVC, giúp tách biệt rõ phần hiển thị, dữ liệu và xử lý sự kiện.
+```xml
+<system.serviceModel>
+  <behaviors>
+    <serviceBehaviors>
+      <behavior>
+        <serviceMetadata httpGetEnabled="true"/>
+        <serviceDebug includeExceptionDetailInFaults="true"/>
+      </behavior>
+    </serviceBehaviors>
+    <endpointBehaviors>
+      <behavior name="webBehavior">
+        <webHttp helpEnabled="true" defaultOutgoingResponseFormat="Json"/>
+      </behavior>
+    </endpointBehaviors>
+  </behaviors>
+  <services>
+    <service name="quanlysinhvien.Services.SinhvienService">
+      <endpoint address="" binding="webHttpBinding"
+                contract="quanlysinhvien.IServices.ISinhvienService"
+                behaviorConfiguration="webBehavior"/>
+    </service>
+    <!-- ... các service khác tương tự ... -->
+  </services>
+</system.serviceModel>
+```
 
-![Mô hình kiến trúc frontend](image-1.png)
-
-Cấu trúc thư mục chính:
-
-- `app/khoa/model.js`, `app/khoa/view.js`, `app/khoa/controller.js`  
-- `app/lop/model.js`, `app/lop/view.js`, `app/lop/controller.js`  
-- `app/sinhvien/...`, `app/monhoc/...`, `app/giangvien/...`, `app/diem/...`
-
-Trong đó:
-
-- Model: định nghĩa cấu trúc dữ liệu (field, type) và cấu hình store để gọi tới WCF service (URL, phương thức, mapping JSON…).  
-- View: các grid, form, window để hiển thị danh sách và chi tiết khoa, lớp, sinh viên, điểm,…  
-- Controller: bắt sự kiện từ view (click, add, edit, delete), gọi store/load/save, gọi WCF service qua AJAX, xử lý kết quả và cập nhật lại giao diện.  
-
-Nhờ áp dụng ExtJS MVC, từng module (khoa, lớp, sinh viên,…) được đóng gói riêng, dễ bảo trì và mở rộng.
+!!! info "webHttpBinding"
+    `webHttpBinding` + `webHttp` behavior = REST endpoint với JSON serialize tự động.  
+    Không dùng SOAP, không dùng `basicHttpBinding`.
 
 ---
 
-## 5. Tương tác giữa các thành phần
+## 5. Pattern Repository
 
-Luồng xử lý điển hình khi người dùng thao tác trên giao diện ExtJS (ví dụ thêm sinh viên mới):
+```csharp
+// BLL chỉ biết về business rules, không biết SQL
+public class SinhvienBLL
+{
+    public List<SINHVIENDTO> GetAll()
+    {
+        // Gọi repository — không viết SQL ở đây
+        return new SinhvienRepository().GetAll();
+    }
 
-1. Người dùng mở màn hình “Quản lý sinh viên” (view ExtJS), nhập thông tin vào form và nhấn Lưu.  
-2. Controller của module `sinhvien` bắt sự kiện, lấy dữ liệu từ form và gửi request AJAX/Store sync tới WCF service tương ứng.  
-3. Service WCF nhận request, gọi lớp Business để kiểm tra ràng buộc (mã lớp tồn tại, định dạng email, ngày sinh hợp lệ, v.v.).  
-4. Business gọi Repository/DAL để thực hiện câu lệnh INSERT/UPDATE trên SQL Server (bảng SINHVIEN, INFORSINHVIEN).  
-5. WCF trả về kết quả (thành công/lỗi) dưới dạng JSON/XML, ExtJS xử lý response, hiển thị thông báo cho người dùng và cập nhật lại grid/list.  
+    public void Create(SINHVIENDTO dto)
+    {
+        // Validate nghiệp vụ
+        if (string.IsNullOrEmpty(dto.MaSV))
+            throw new ArgumentException("Mã SV không được rỗng");
 
-Cách thiết kế này giúp tách biệt rõ giữa giao diện ExtJS, nghiệp vụ trong WCF và dữ liệu trong SQL Server, thuận tiện cho việc mở rộng hoặc thay đổi từng lớp trong tương lai.
+        new SinhvienRepository().Insert(dto);
+    }
+}
+
+// Repository chứa SQL thuần
+public class SinhvienRepository
+{
+    private string _connStr = ConfigurationManager.ConnectionStrings["QlSVDB"].ConnectionString;
+
+    public List<SINHVIENDTO> GetAll()
+    {
+        var result = new List<SINHVIENDTO>();
+        using (var conn = new SqlConnection(_connStr))
+        {
+            conn.Open();
+            var cmd = new SqlCommand("SELECT MaSV, TenSV, NgaySinh, GioiTinh, MaLop FROM SINHVIEN", conn);
+            var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                result.Add(new SINHVIENDTO {
+                    MaSV     = reader["MaSV"].ToString(),
+                    TenSV    = reader["TenSV"].ToString(),
+                    NgaySinh = Convert.ToDateTime(reader["NgaySinh"]),
+                    GioiTinh = Convert.ToBoolean(reader["GioiTinh"]),
+                    MaLop    = reader["MaLop"].ToString()
+                });
+            }
+        }
+        return result;
+    }
+}
+```
+
+---
+
+## 6. DTO Pattern
+
+Mỗi entity có 2 class: **Entity** (ánh xạ DB) và **DTO** (truyền giữa tầng / sang client).
+
+```csharp
+// Entity — ánh xạ 1:1 với bảng DB
+public class SINHVIEN
+{
+    public string MaSV    { get; set; }
+    public string TenSV   { get; set; }
+    public DateTime NgaySinh { get; set; }
+    public bool GioiTinh  { get; set; }
+    public string MaLop   { get; set; }
+}
+
+// DTO — [DataContract] để WCF serialize sang JSON
+[DataContract]
+public class SINHVIENDTO
+{
+    [DataMember] public string MaSV    { get; set; }
+    [DataMember] public string TenSV   { get; set; }
+    [DataMember] public DateTime NgaySinh { get; set; }
+    [DataMember] public bool GioiTinh  { get; set; }
+    [DataMember] public string MaLop   { get; set; }
+}
+```
+
+!!! tip "Tại sao cần DTO?"
+    DTO tách biệt cấu trúc truyền dữ liệu khỏi model DB.  
+    Có thể thêm/bỏ field mà không ảnh hưởng đến bảng hoặc ngược lại.
+
+---
+
+## 7. Kiến trúc Frontend (ExtJS Classic MVC)
+
+```mermaid
+flowchart LR
+    subgraph "ExtJS Application"
+        direction TB
+        M["Model\nExt.data.Model\nField definitions"]
+        S["Store\nExt.data.Store\nREST proxy → WCF"]
+        V["View\nExt.grid.Panel\nExt.form.Panel\nExt.window.Window"]
+        C["Controller\nExt.app.Controller\nEvent handlers"]
+    end
+
+    WCF["WCF REST\nJSON"]
+
+    M --- S
+    S --- V
+    V --- C
+    C -->|"AJAX / store.sync()"| WCF
+    WCF -->|"JSON"| S
+```
+
+### Cấu trúc module
+
+```
+app/
+├── khoa/
+│   ├── model.js       # Ext.data.Model: MaKhoa, TenKhoa
+│   ├── view.js        # Grid + Form + Toolbar
+│   └── controller.js  # Handlers: add, edit, delete, reload
+├── lop/
+│   ├── model.js
+│   ├── view.js
+│   └── controller.js
+├── sinhvien/
+│   ├── model.js
+│   ├── view.js        # Grid SV + Form SV + Tab thông tin mở rộng
+│   └── controller.js
+├── giangvien/
+│   └── ...
+├── monhoc/
+│   └── ...
+└── diem/
+    └── ...
+```
+
+---
+
+## 8. Luồng dữ liệu điển hình — Thêm sinh viên
+
+```mermaid
+sequenceDiagram
+    actor U as Người dùng
+    participant V as ExtJS View (Form)
+    participant C as ExtJS Controller
+    participant WCF as WCF SinhvienService
+    participant BLL as SinhvienBLL
+    participant DB as SQL Server
+
+    U->>V: Điền form + nhấn Lưu
+    V->>C: onSaveClick event
+    C->>C: Lấy data từ form
+    C->>WCF: POST /sinhvien/Create (JSON body)
+    WCF->>BLL: Create(SINHVIENDTO)
+    BLL->>BLL: Validate (MaSV không rỗng, MaLop tồn tại)
+    BLL->>DB: INSERT INTO SINHVIEN ...
+    DB-->>BLL: OK (1 row affected)
+    BLL-->>WCF: void (success)
+    WCF-->>C: HTTP 200
+    C->>V: store.reload() → grid refresh
+    V->>U: Hiển thị sinh viên mới trong grid
+```
+
+---
+
+## 9. Luồng dữ liệu — Xem bảng điểm sinh viên
+
+```mermaid
+sequenceDiagram
+    actor U as Người dùng
+    participant C as ExtJS Controller
+    participant WCF as WCF SinhvienService
+    participant DB as SQL Server
+
+    U->>C: Chọn sinh viên → click "Bảng điểm"
+    C->>WCF: GET /sinhvien/{maSV}/bangdiem
+    WCF->>DB: SELECT d.*, m.TenMon, g.TenGV FROM DIEM d ...
+    DB-->>WCF: List<BANGDIEMDTO>
+    WCF-->>C: JSON array
+    C->>C: Đổ data vào diemStore
+    C->>U: Hiển thị grid bảng điểm
+```
